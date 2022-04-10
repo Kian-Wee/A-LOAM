@@ -52,6 +52,7 @@
 #include <sensor_msgs/PointCloud2.h>
 #include <tf/transform_datatypes.h>
 #include <tf/transform_broadcaster.h>
+#include <stdlib.h>     /* getenv */
 
 using std::atan2;
 using std::cos;
@@ -460,7 +461,7 @@ void laserCloudHandler(const sensor_msgs::PointCloud2ConstPtr &laserCloudMsg)
 
 int main(int argc, char **argv)
 {
-    ros::init(argc, argv, "scanRegistration");
+    ros::init(argc, argv, std::string(getenv("DRONE_NAME")) + std::string("scanRegistration"));
     ros::NodeHandle nh;
 
     nh.param<int>("scan_line", N_SCANS, 16);
@@ -475,25 +476,25 @@ int main(int argc, char **argv)
         return 0;
     }
 
-    ros::Subscriber subLaserCloud = nh.subscribe<sensor_msgs::PointCloud2>("/velodyne_points", 100, laserCloudHandler);
+    ros::Subscriber subLaserCloud = nh.subscribe<sensor_msgs::PointCloud2>(std::string(getenv("DRONE_NAME")) + std::string("uav1_os_cloud_node/points"), 100, laserCloudHandler);
 
-    pubLaserCloud = nh.advertise<sensor_msgs::PointCloud2>("/velodyne_cloud_2", 100);
+    pubLaserCloud = nh.advertise<sensor_msgs::PointCloud2>(std::string(getenv("DRONE_NAME")) + std::string("velodyne_cloud_2"), 100);
 
-    pubCornerPointsSharp = nh.advertise<sensor_msgs::PointCloud2>("/laser_cloud_sharp", 100);
+    pubCornerPointsSharp = nh.advertise<sensor_msgs::PointCloud2>(std::string(getenv("DRONE_NAME")) + std::string("laser_cloud_sharp"), 100);
 
-    pubCornerPointsLessSharp = nh.advertise<sensor_msgs::PointCloud2>("/laser_cloud_less_sharp", 100);
+    pubCornerPointsLessSharp = nh.advertise<sensor_msgs::PointCloud2>(std::string(getenv("DRONE_NAME")) + std::string("laser_cloud_less_sharp"), 100);
 
-    pubSurfPointsFlat = nh.advertise<sensor_msgs::PointCloud2>("/laser_cloud_flat", 100);
+    pubSurfPointsFlat = nh.advertise<sensor_msgs::PointCloud2>(std::string(getenv("DRONE_NAME")) + std::string("laser_cloud_flat"), 100);
 
-    pubSurfPointsLessFlat = nh.advertise<sensor_msgs::PointCloud2>("/laser_cloud_less_flat", 100);
+    pubSurfPointsLessFlat = nh.advertise<sensor_msgs::PointCloud2>(std::string(getenv("DRONE_NAME")) + std::string("laser_cloud_less_flat"), 100);
 
-    pubRemovePoints = nh.advertise<sensor_msgs::PointCloud2>("/laser_remove_points", 100);
+    pubRemovePoints = nh.advertise<sensor_msgs::PointCloud2>(std::string(getenv("DRONE_NAME")) + std::string("laser_remove_points"), 100);
 
     if(PUB_EACH_LINE)
     {
         for(int i = 0; i < N_SCANS; i++)
         {
-            ros::Publisher tmp = nh.advertise<sensor_msgs::PointCloud2>("/laser_scanid_" + std::to_string(i), 100);
+            ros::Publisher tmp = nh.advertise<sensor_msgs::PointCloud2>(std::string(getenv("DRONE_NAME")) + std::string("laser_scanid_") + std::to_string(i), 100);
             pubEachScan.push_back(tmp);
         }
     }

@@ -51,6 +51,7 @@
 #include <eigen3/Eigen/Dense>
 #include <mutex>
 #include <queue>
+#include <stdlib.h>     /* getenv */
 
 #include "aloam_velodyne/common.h"
 #include "aloam_velodyne/tic_toc.h"
@@ -185,32 +186,32 @@ void laserCloudFullResHandler(const sensor_msgs::PointCloud2ConstPtr &laserCloud
 
 int main(int argc, char **argv)
 {
-    ros::init(argc, argv, "laserOdometry");
+    ros::init(argc, argv, std::string(getenv("DRONE_NAME")) + std::string("laserOdometry"));
     ros::NodeHandle nh;
 
     nh.param<int>("mapping_skip_frame", skipFrameNum, 2);
 
     printf("Mapping %d Hz \n", 10 / skipFrameNum);
 
-    ros::Subscriber subCornerPointsSharp = nh.subscribe<sensor_msgs::PointCloud2>("/laser_cloud_sharp", 100, laserCloudSharpHandler);
+    ros::Subscriber subCornerPointsSharp = nh.subscribe<sensor_msgs::PointCloud2>(std::string(getenv("DRONE_NAME")) + std::string("/laser_cloud_sharp"), 100, laserCloudSharpHandler);
 
-    ros::Subscriber subCornerPointsLessSharp = nh.subscribe<sensor_msgs::PointCloud2>("/laser_cloud_less_sharp", 100, laserCloudLessSharpHandler);
+    ros::Subscriber subCornerPointsLessSharp = nh.subscribe<sensor_msgs::PointCloud2>(std::string(getenv("DRONE_NAME")) + std::string("/laser_cloud_less_sharp"), 100, laserCloudLessSharpHandler);
 
-    ros::Subscriber subSurfPointsFlat = nh.subscribe<sensor_msgs::PointCloud2>("/laser_cloud_flat", 100, laserCloudFlatHandler);
+    ros::Subscriber subSurfPointsFlat = nh.subscribe<sensor_msgs::PointCloud2>(std::string(getenv("DRONE_NAME")) + std::string("/laser_cloud_flat"), 100, laserCloudFlatHandler);
 
-    ros::Subscriber subSurfPointsLessFlat = nh.subscribe<sensor_msgs::PointCloud2>("/laser_cloud_less_flat", 100, laserCloudLessFlatHandler);
+    ros::Subscriber subSurfPointsLessFlat = nh.subscribe<sensor_msgs::PointCloud2>(std::string(getenv("DRONE_NAME")) + std::string("/laser_cloud_less_flat"), 100, laserCloudLessFlatHandler);
 
-    ros::Subscriber subLaserCloudFullRes = nh.subscribe<sensor_msgs::PointCloud2>("/velodyne_cloud_2", 100, laserCloudFullResHandler);
+    ros::Subscriber subLaserCloudFullRes = nh.subscribe<sensor_msgs::PointCloud2>(std::string(getenv("DRONE_NAME")) + std::string("/velodyne_cloud_2"), 100, laserCloudFullResHandler);
 
-    ros::Publisher pubLaserCloudCornerLast = nh.advertise<sensor_msgs::PointCloud2>("/laser_cloud_corner_last", 100);
+    ros::Publisher pubLaserCloudCornerLast = nh.advertise<sensor_msgs::PointCloud2>(std::string(getenv("DRONE_NAME")) + std::string("/laser_cloud_corner_last"), 100);
 
-    ros::Publisher pubLaserCloudSurfLast = nh.advertise<sensor_msgs::PointCloud2>("/laser_cloud_surf_last", 100);
+    ros::Publisher pubLaserCloudSurfLast = nh.advertise<sensor_msgs::PointCloud2>(std::string(getenv("DRONE_NAME")) + std::string("/laser_cloud_surf_last"), 100);
 
-    ros::Publisher pubLaserCloudFullRes = nh.advertise<sensor_msgs::PointCloud2>("/velodyne_cloud_3", 100);
+    ros::Publisher pubLaserCloudFullRes = nh.advertise<sensor_msgs::PointCloud2>(std::string(getenv("DRONE_NAME")) + std::string("/velodyne_cloud_3"), 100);
 
-    ros::Publisher pubLaserOdometry = nh.advertise<nav_msgs::Odometry>("/laser_odom_to_init", 100);
+    ros::Publisher pubLaserOdometry = nh.advertise<nav_msgs::Odometry>(std::string(getenv("DRONE_NAME")) + std::string("/laser_odom_to_init"), 100);
 
-    ros::Publisher pubLaserPath = nh.advertise<nav_msgs::Path>("/laser_odom_path", 100);
+    ros::Publisher pubLaserPath = nh.advertise<nav_msgs::Path>(std::string(getenv("DRONE_NAME")) + std::string("/laser_odom_path"), 100);
 
     nav_msgs::Path laserPath;
 
