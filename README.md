@@ -1,4 +1,7 @@
 # A-LOAM
+
+(Edit of A-LOAM Library to allow for multiple instances, via external environment in ~/.bashrc[export DRONE_NAME=""])
+
 ## Advanced implementation of LOAM
 
 A-LOAM is an Advanced implementation of LOAM (J. Zhang and S. Singh. LOAM: Lidar Odometry and Mapping in Real-time), which uses Eigen and Ceres Solver to simplify code structure. This code is modified from LOAM and [LOAM_NOTED](https://github.com/cuitaixiang/LOAM_NOTED). This code is clean and simple without complicated mathematical derivation and redundant operations. It is a good learning material for SLAM beginners.
