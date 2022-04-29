@@ -21,7 +21,6 @@
 #include <pcl/point_types.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <sensor_msgs/PointCloud2.h>
-#include <stdlib.h>     /* getenv */
 
 std::vector<float> read_lidar_data(const std::string lidar_data_path)
 {
@@ -37,7 +36,7 @@ std::vector<float> read_lidar_data(const std::string lidar_data_path)
 
 int main(int argc, char** argv)
 {
-    ros::init(argc, argv, std::string(getenv("DRONE_NAME")) + std::string("kitti_helper"));
+    ros::init(argc, argv, "kitti_helper");
     ros::NodeHandle n("~");
     std::string dataset_folder, sequence_number, output_bag_file;
     n.getParam("dataset_folder", dataset_folder);
@@ -51,7 +50,7 @@ int main(int argc, char** argv)
     n.getParam("publish_delay", publish_delay);
     publish_delay = publish_delay <= 0 ? 1 : publish_delay;
 
-    ros::Publisher pub_laser_cloud = n.advertise<sensor_msgs::PointCloud2>(std::string(getenv("DRONE_NAME")) + std::string("/velodyne_points"), 2);
+    ros::Publisher pub_laser_cloud = n.advertise<sensor_msgs::PointCloud2>("/velodyne_points", 2);
 
     image_transport::ImageTransport it(n);
     image_transport::Publisher pub_image_left = it.advertise("/image_left", 2);

@@ -57,7 +57,6 @@
 #include <thread>
 #include <iostream>
 #include <string>
-#include <stdlib.h>     /* getenv */
 
 #include "lidarFactor.hpp"
 #include "aloam_velodyne/common.h"
@@ -216,8 +215,8 @@ void laserOdometryHandler(const nav_msgs::Odometry::ConstPtr &laserOdometry)
 	Eigen::Vector3d t_w_curr = q_wmap_wodom * t_wodom_curr + t_wmap_wodom; 
 
 	nav_msgs::Odometry odomAftMapped;
-	odomAftMapped.header.frame_id = "/camera_init";
-	odomAftMapped.child_frame_id = "/aft_mapped";
+	odomAftMapped.header.frame_id = std::string(getenv("DRONE_NAME")) + "/camera_init";
+	odomAftMapped.child_frame_id = std::string(getenv("DRONE_NAME")) + "/aft_mapped";
 	odomAftMapped.header.stamp = laserOdometry->header.stamp;
 	odomAftMapped.pose.pose.orientation.x = q_w_curr.x();
 	odomAftMapped.pose.pose.orientation.y = q_w_curr.y();
@@ -817,7 +816,7 @@ void process()
 				sensor_msgs::PointCloud2 laserCloudSurround3;
 				pcl::toROSMsg(*laserCloudSurround, laserCloudSurround3);
 				laserCloudSurround3.header.stamp = ros::Time().fromSec(timeLaserOdometry);
-				laserCloudSurround3.header.frame_id = "/camera_init";
+				laserCloudSurround3.header.frame_id = std::string(getenv("DRONE_NAME")) + "/camera_init";
 				pubLaserCloudSurround.publish(laserCloudSurround3);
 			}
 
@@ -832,7 +831,7 @@ void process()
 				sensor_msgs::PointCloud2 laserCloudMsg;
 				pcl::toROSMsg(laserCloudMap, laserCloudMsg);
 				laserCloudMsg.header.stamp = ros::Time().fromSec(timeLaserOdometry);
-				laserCloudMsg.header.frame_id = "/camera_init";
+				laserCloudMsg.header.frame_id = std::string(getenv("DRONE_NAME")) + "/camera_init";
 				pubLaserCloudMap.publish(laserCloudMsg);
 			}
 
@@ -845,7 +844,7 @@ void process()
 			sensor_msgs::PointCloud2 laserCloudFullRes3;
 			pcl::toROSMsg(*laserCloudFullRes, laserCloudFullRes3);
 			laserCloudFullRes3.header.stamp = ros::Time().fromSec(timeLaserOdometry);
-			laserCloudFullRes3.header.frame_id = "/camera_init";
+			laserCloudFullRes3.header.frame_id = std::string(getenv("DRONE_NAME")) + "/camera_init";
 			pubLaserCloudFullRes.publish(laserCloudFullRes3);
 
 			printf("mapping pub time %f ms \n", t_pub.toc());
@@ -853,8 +852,8 @@ void process()
 			printf("whole mapping time %f ms +++++\n", t_whole.toc());
 
 			nav_msgs::Odometry odomAftMapped;
-			odomAftMapped.header.frame_id = "/camera_init";
-			odomAftMapped.child_frame_id = "/aft_mapped";
+			odomAftMapped.header.frame_id = std::string(getenv("DRONE_NAME")) + "/camera_init";
+			odomAftMapped.child_frame_id = std::string(getenv("DRONE_NAME")) + "/aft_mapped";
 			odomAftMapped.header.stamp = ros::Time().fromSec(timeLaserOdometry);
 			odomAftMapped.pose.pose.orientation.x = q_w_curr.x();
 			odomAftMapped.pose.pose.orientation.y = q_w_curr.y();
@@ -869,7 +868,7 @@ void process()
 			laserAfterMappedPose.header = odomAftMapped.header;
 			laserAfterMappedPose.pose = odomAftMapped.pose.pose;
 			laserAfterMappedPath.header.stamp = odomAftMapped.header.stamp;
-			laserAfterMappedPath.header.frame_id = "/camera_init";
+			laserAfterMappedPath.header.frame_id = std::string(getenv("DRONE_NAME")) + "/camera_init";
 			laserAfterMappedPath.poses.push_back(laserAfterMappedPose);
 			pubLaserAfterMappedPath.publish(laserAfterMappedPath);
 
@@ -884,7 +883,7 @@ void process()
 			q.setY(q_w_curr.y());
 			q.setZ(q_w_curr.z());
 			transform.setRotation(q);
-			br.sendTransform(tf::StampedTransform(transform, odomAftMapped.header.stamp, "/camera_init", "/aft_mapped"));
+			br.sendTransform(tf::StampedTransform(transform, odomAftMapped.header.stamp, std::string(getenv("DRONE_NAME")) + "/camera_init", std::string(getenv("DRONE_NAME")) + "/aft_mapped"));
 
 			frameCount++;
 		}
@@ -895,7 +894,7 @@ void process()
 
 int main(int argc, char **argv)
 {
-	ros::init(argc, argv, "laserMapping");
+	ros::init(argc, argv, std::string(getenv("DRONE_NAME")) + "_laserMapping");
 	ros::NodeHandle nh;
 
 	float lineRes = 0;
@@ -906,25 +905,25 @@ int main(int argc, char **argv)
 	downSizeFilterCorner.setLeafSize(lineRes, lineRes,lineRes);
 	downSizeFilterSurf.setLeafSize(planeRes, planeRes, planeRes);
 
-	ros::Subscriber subLaserCloudCornerLast = nh.subscribe<sensor_msgs::PointCloud2>(std::string(getenv("DRONE_NAME")) + std::string("/laser_cloud_corner_last"), 100, laserCloudCornerLastHandler);
+	ros::Subscriber subLaserCloudCornerLast = nh.subscribe<sensor_msgs::PointCloud2>(std::string(getenv("DRONE_NAME")) + "/laser_cloud_corner_last", 100, laserCloudCornerLastHandler);
 
-	ros::Subscriber subLaserCloudSurfLast = nh.subscribe<sensor_msgs::PointCloud2>(std::string(getenv("DRONE_NAME")) + std::string("/laser_cloud_surf_last"), 100, laserCloudSurfLastHandler);
+	ros::Subscriber subLaserCloudSurfLast = nh.subscribe<sensor_msgs::PointCloud2>(std::string(getenv("DRONE_NAME")) + "/laser_cloud_surf_last", 100, laserCloudSurfLastHandler);
 
-	ros::Subscriber subLaserOdometry = nh.subscribe<nav_msgs::Odometry>(std::string(getenv("DRONE_NAME")) + std::string("/laser_odom_to_init"), 100, laserOdometryHandler);
+	ros::Subscriber subLaserOdometry = nh.subscribe<nav_msgs::Odometry>(std::string(getenv("DRONE_NAME")) + "/laser_odom_to_init", 100, laserOdometryHandler);
 
-	ros::Subscriber subLaserCloudFullRes = nh.subscribe<sensor_msgs::PointCloud2>(std::string(getenv("DRONE_NAME")) + std::string("/velodyne_cloud_3"), 100, laserCloudFullResHandler);
+	ros::Subscriber subLaserCloudFullRes = nh.subscribe<sensor_msgs::PointCloud2>(std::string(getenv("DRONE_NAME")) + "/velodyne_cloud_3", 100, laserCloudFullResHandler);
 
-	pubLaserCloudSurround = nh.advertise<sensor_msgs::PointCloud2>(std::string(getenv("DRONE_NAME")) + std::string("/laser_cloud_surround"), 100);
+	pubLaserCloudSurround = nh.advertise<sensor_msgs::PointCloud2>(std::string(getenv("DRONE_NAME")) + "/laser_cloud_surround", 100);
 
-	pubLaserCloudMap = nh.advertise<sensor_msgs::PointCloud2>(std::string(getenv("DRONE_NAME")) + std::string("/laser_cloud_map"), 100);
+	pubLaserCloudMap = nh.advertise<sensor_msgs::PointCloud2>(std::string(getenv("DRONE_NAME")) + "/laser_cloud_map", 100);
 
-	pubLaserCloudFullRes = nh.advertise<sensor_msgs::PointCloud2>(std::string(getenv("DRONE_NAME")) + std::string("/velodyne_cloud_registered"), 100);
+	pubLaserCloudFullRes = nh.advertise<sensor_msgs::PointCloud2>(std::string(getenv("DRONE_NAME")) + "/velodyne_cloud_registered", 100);
 
-	pubOdomAftMapped = nh.advertise<nav_msgs::Odometry>(std::string(getenv("DRONE_NAME")) + std::string("/aft_mapped_to_init"), 100);
+	pubOdomAftMapped = nh.advertise<nav_msgs::Odometry>(std::string(getenv("DRONE_NAME")) + "/aft_mapped_to_init", 100);
 
-	pubOdomAftMappedHighFrec = nh.advertise<nav_msgs::Odometry>(std::string(getenv("DRONE_NAME")) + std::string("/aft_mapped_to_init_high_frec"), 100);
+	pubOdomAftMappedHighFrec = nh.advertise<nav_msgs::Odometry>(std::string(getenv("DRONE_NAME")) + "/aft_mapped_to_init_high_frec", 100);
 
-	pubLaserAfterMappedPath = nh.advertise<nav_msgs::Path>(std::string(getenv("DRONE_NAME")) + std::string("/aft_mapped_path"), 100);
+	pubLaserAfterMappedPath = nh.advertise<nav_msgs::Path>(std::string(getenv("DRONE_NAME")) + "/aft_mapped_path", 100);
 
 	for (int i = 0; i < laserCloudNum; i++)
 	{
